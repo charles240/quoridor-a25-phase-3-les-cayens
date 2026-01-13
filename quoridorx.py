@@ -1,7 +1,17 @@
+"""
+Permet d'afficher le jeu de Quoridor graphiquement en utilisant la bibliothèque turtle.
+Hérite de la classe Quoridor définie dans quoridor.py.
+"""
 import turtle
+import time
 from quoridor import Quoridor
 
 class QuoridorX(Quoridor):
+    """
+    Docstring for QuoridorX :
+    Permet d'afficher le jeu de Quoridor graphiquement en utilisant la bibliothèque turtle.
+    Hérite de la classe Quoridor définie dans quoridor.py.
+    """
 
     TAILLE_CASE = 50
     ORIGINE_X = -225
@@ -9,28 +19,34 @@ class QuoridorX(Quoridor):
 
     def __init__(self, joueurs, murs=None, tour=1):
         super().__init__(joueurs, murs, tour)
-
         self.fenetre = turtle.Screen()
         self.fenetre.title("Quoridor")
+        #self.fenetre.tracer(0)
 
         self.crayon = turtle.Turtle()
         self.crayon.hideturtle()
         self.crayon.speed(0)
 
         self.afficher()
-
+        self.fenetre.update()
 
     def afficher(self):
+        """
+        Docstring for afficher
+        Affiche l'état actuel du jeu dans la fenêtre turtle.
+        """
         self.crayon.clear()
         self.dessiner_entete()
         self.dessiner_damier()
         self.dessiner_coordonnees()
         self.dessiner_pions()
         self.dessiner_murs()
-        
-
 
     def dessiner_ligne_verticale(self, x):
+        """
+        Docstring for dessiner_ligne_verticale
+        Dessine une ligne verticale à la position x donnée.
+        """
         self.crayon.penup()
         self.crayon.goto(
             self.ORIGINE_X + x * self.TAILLE_CASE,
@@ -42,8 +58,11 @@ class QuoridorX(Quoridor):
             self.ORIGINE_Y + 9 * self.TAILLE_CASE
         )
 
-
     def dessiner_ligne_horizontale(self, y):
+        """
+        Docstring for dessiner_ligne_horizontale
+        Dessine une ligne horizontale à la position y donnée.
+        """
         self.crayon.penup()
         self.crayon.goto(
             self.ORIGINE_X,
@@ -55,14 +74,20 @@ class QuoridorX(Quoridor):
             self.ORIGINE_Y + y * self.TAILLE_CASE
         )
 
-
     def dessiner_damier(self):
+        """
+        Docstring for dessiner_damier
+        Dessine le damier de Quoridor.
+        """
         for i in range(10):
             self.dessiner_ligne_verticale(i)
             self.dessiner_ligne_horizontale(i)
 
-
     def dessiner_pions(self):
+        """
+        Docstring for dessiner_pions
+        Dessine les pions des joueurs sur le damier.
+        """
         couleurs = ["blue", "red"]
 
         for i, joueur in enumerate(self.joueurs):
@@ -75,9 +100,12 @@ class QuoridorX(Quoridor):
             self.crayon.goto(px, py)
             self.crayon.dot(self.TAILLE_CASE * 0.6, couleurs[i])
 
-
     def dessiner_murs(self):
-        self.crayon.pensize(5)
+        """
+        Docstring for dessiner_murs
+        Dessine les murs sur le damier.
+        """
+        self.crayon.pensize(8)
 
         # Murs horizontaux
         for x, y in self.murs["horizontaux"]:
@@ -99,14 +127,19 @@ class QuoridorX(Quoridor):
             self.crayon.goto(px, py + 2 * self.TAILLE_CASE)
 
         self.crayon.pensize(1)
+        self.crayon.color("black")
 
     def appliquer_un_coup(self, nom_joueur, coup, position):
         resultat = super().appliquer_un_coup(nom_joueur, coup, position)
         self.afficher()
+        time.sleep(1)
         return resultat
-    
 
     def dessiner_coordonnees(self):
+        """
+        Docstring for dessiner_coordonnees
+        Dessine les coordonnées autour du damier.
+        """
         self.crayon.penup()
         self.crayon.color("black")
 
@@ -119,7 +152,7 @@ class QuoridorX(Quoridor):
             self.crayon.write(
                 str(x),
                 align="center",
-                font=("Arial", 12, "normal")
+                font=("Roboto", 12, "normal")
             )
 
         # Chiffres à gauche (y)
@@ -131,11 +164,14 @@ class QuoridorX(Quoridor):
             self.crayon.write(
                 str(y),
                 align="center",
-                font=("Arial", 12, "normal")
-        )
-    
+                font=("Roboto", 12, "normal")
+            )
 
     def dessiner_entete(self):
+        """
+        Docstring for dessiner_entete
+        Dessine l'entête avec la légende des joueurs.
+        """
         self.crayon.penup()
         self.crayon.color("black")
 
@@ -148,7 +184,7 @@ class QuoridorX(Quoridor):
         self.crayon.write(
             "Légende:",
             align="left",
-            font=("Arial", 14, "bold")
+            font=("Roboto", 14, "bold")
         )
 
         # Joueurs
@@ -162,5 +198,5 @@ class QuoridorX(Quoridor):
             self.crayon.write(
                 texte,
                 align="left",
-                font=("Arial", 12, "normal")
+                font=("Roboto", 12, "normal")
             )

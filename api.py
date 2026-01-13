@@ -16,7 +16,7 @@ URL = "https://pax.ulaval.ca/quoridor/api/a25/"
 
 def créer_une_partie(idul, secret):
     """Permet de créer une nouvelle partie de Quoridor. en utilissant l'idul et le secret."""
-    rep = requests.post(f"{URL}/jeux", auth=(idul, secret))
+    rep = requests.post(f"{URL}/jeux", auth=(idul, secret), timeout=30000)
     if rep.status_code == 200:
         data = rep.json()
         return data["id"], data["état"]
@@ -32,7 +32,8 @@ def appliquer_un_coup(id_partie, coup, position, idul, secret):
     rep = requests.put(
         f"{URL}/jeux/{id_partie}",
         auth=(idul, secret),
-        json={"coup": coup, "position": position})
+        json={"coup": coup, "position": position},
+        timeout=30000)
     if rep.status_code == 200:
         data = rep.json()
         if data["partie"] == "terminée":
@@ -49,7 +50,7 @@ def appliquer_un_coup(id_partie, coup, position, idul, secret):
 
 def récupérer_une_partie(id_partie, idul, secret):
     """Permet de continuer une partie existante en récupérant son état actuel."""
-    rep = requests.get(f"{URL}/jeux/{id_partie}", auth=(idul, secret))
+    rep = requests.get(f"{URL}/jeux/{id_partie}", auth=(idul, secret), timeout=30000)
     if rep.status_code == 200:
         data = rep.json()
         return data["id"], data["état"]

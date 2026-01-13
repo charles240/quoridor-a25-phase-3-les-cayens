@@ -1,5 +1,4 @@
 """Module de la classe Quoridor
-
 Classes:
     * Quoridor - Classe pour encapsuler le jeu Quoridor.
     * interpréter_la_ligne_de_commande - Génère un interpréteur de commande.
@@ -10,7 +9,6 @@ from copy import deepcopy
 import networkx as nx
 from quoridor_error import QuoridorError
 from graphe import construire_graphe
-
 
 class Quoridor:
     """Classe pour encapsuler le jeu Quoridor.
@@ -276,32 +274,48 @@ class Quoridor:
 
 
     def jouer_un_coup(self, nom_joueur):
-        """Jouer un coup automatique pour un joueur."""
-
-        # Vérifier que le joueur existe
-        if nom_joueur not in [j["nom"] for j in self.joueurs]:
-            raise QuoridorError(f"Le joueur '{nom_joueur}' n'existe pas.")
-
-        # Vérifier si la partie est terminée
+        """
+        Docstring for jouer_un_coup
+        Permet de jouer automatiquement un coup pour le joueur spécifié.
+        """
         if self.partie_terminée():
             raise QuoridorError("La partie est déjà terminée.")
 
-        # Récupérer la position actuelle du joueur
         joueur = next(j for j in self.joueurs if j["nom"] == nom_joueur)
-        x, y = joueur["position"]
+        adversaire = next(j for j in self.joueurs if j["nom"] != nom_joueur)
 
-        # Déterminer le mouvement vers la ligne d'arrivée
-        if nom_joueur == self.joueurs[0]["nom"]:
-            # joueur 1 -> avancer vers y + 1
-            nouvelle_position = [x, y + 1] if y < 9 else [x, y]
-        else:
-            # joueur 2 -> avancer vers y - 1
-            nouvelle_position = [x, y - 1] if y > 1 else [x, y]
+        graphe = construire_graphe(
+            [j["position"] for j in self.joueurs],
+            self.murs["horizontaux"],
+            self.murs["verticaux"]
+        )
 
-        # Appliquer le coup en utilisant la méthode appliquer_un_coup
-        self.appliquer_un_coup(nom_joueur, "D", nouvelle_position)
+        # Objectifs
+        objectif_joueur = "B1" if joueur == self.joueurs[0] else "B2"
+        objectif_adv = "B2" if joueur == self.joueurs[0] else "B1"
 
-        return ("D", nouvelle_position)
+        chemin_j = nx.shortest_path(graphe, tuple(joueur["position"]), objectif_joueur)
+        chemin_a = nx.shortest_path(graphe, tuple(adversaire["position"]), objectif_adv)
+
+        #Cas obligatoire : bloquer l'adversaire
+        if len(chemin_a) == 2 and joueur["murs"] > 0:
+            x, y = adversaire["position"]
+
+            # Essayer mur horizontal puis vertical
+            for orientation, pos in [
+                ("MH", [x, y]),
+                ("MV", [x, y])
+            ]:
+                try:
+                    self.appliquer_un_coup(nom_joueur, orientation, pos)
+                    return (orientation, pos)
+                except QuoridorError:
+                    pass  # essayer autre mur
+
+        #Avancer sur le plus court chemin
+        prochaine_case = list(chemin_j[1])
+        self.appliquer_un_coup(nom_joueur, "D", prochaine_case)
+        return ("D", prochaine_case)
 
 
 def interpréter_la_ligne_de_commande():
@@ -311,15 +325,21 @@ def interpréter_la_ligne_de_commande():
         Namespace: Un objet Namespace tel que retourné par parser.parse_args().
                    Cette objet aura l'attribut «idul» représentant l'idul du joueur.
     """
-    parser = argparse.ArgumentParser(
-        description="Interface pour jouer au jeu Quoridor."
-    )
+    parser = argparse.ArgumentParser(description="Quoridor")
 
-    # Ajouter l'argument idul (obligatoire)
     parser.add_argument(
         "idul",
-        type=str,
-        help="Votre IDUL pour vous identifier sur le serveur PAX"
+        help="IDUL du joueur"
+    )
+    parser.add_argument(
+        "-a", "--automatique",
+        action="store_true",
+        help="Activer le mode automatique."
+    )
+    parser.add_argument(
+        "-x", "--graphique",
+        action="store_true",
+        help="Activer le mode graphique."
     )
 
     return parser.parse_args()
